@@ -5,12 +5,22 @@ import { of, from } from 'rxjs';
 
 import { GithubService } from './github.service';
 import { token } from './../../secret';
+import * as Highcharts from 'highcharts';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+  // Highchart things
+  Highcharts = Highcharts;
+  chartOptions = {
+    series: [{
+      data: [1, 2, 3]
+    }]
+  };
+
   title = 'app';
   owner = 'angular';
   repo = 'angular';
