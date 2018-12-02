@@ -90,8 +90,16 @@ export class AppComponent implements OnInit {
   updateFromInput = false;
 
   title = 'app';
+  // Mocks
   owner = 'josephroqueca';
   repo = 'bowling-companion';
+
+  // owner = 'angular';
+  // repo = 'angular';
+
+  // owner = 'vuejs';
+  // repo = 'vue';
+
 
   dataMap = new Map<string, FileVolatilityDataPoint>();
 
@@ -169,7 +177,7 @@ const apiBaseUrl = 'https://api.github.com';
 function getCommitsOnRepoApiUrl(owner: string, repo: string): string {
   // GET /repos/:owner/:repo/commits
   // https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository
-  return `${apiBaseUrl}/repos/${owner}/${repo}/commits?per_page=50`;
+  return `${apiBaseUrl}/repos/${owner}/${repo}/commits?per_page=100`;
 }
 
 function getCommitApiUrl(owner: string, repo: string, sha: string): string {
