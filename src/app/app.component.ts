@@ -117,14 +117,8 @@ export class AppComponent implements OnInit {
       map(commit => generateFileVolatilityDataPointsFromCommit(commit)),
       flatMap(fileVolatilityDataPoints => of(...fileVolatilityDataPoints)),
       map(fileVolatilityDataPoint => this.upsertMap(fileVolatilityDataPoint))
-      // tap(t => console.log(t.changeFrequency)),
-      // map(fileVolatilityDataPoint => generateHighchartsDataFromFileVolatilityDataPoints(fileVolatilityDataPoint))
     )
-    .subscribe((dataPoint: any) => {
-      // this.data.push(dataPoint);
-      // nested change - must trigger update
-      this.updateFromInput = true;
-    });
+    .subscribe();
   }
 
   debugTest() {
@@ -143,12 +137,9 @@ export class AppComponent implements OnInit {
     const data = this.dataMap.get(fileVolatilityDataPoint.file);
 
     if (!data) {
-      console.log('new data set for: ', fileVolatilityDataPoint.file);
       this.dataMap.set(fileVolatilityDataPoint.file, fileVolatilityDataPoint);
       return fileVolatilityDataPoint;
     } else {
-      console.log('dup entry attempt on: ', fileVolatilityDataPoint.file);
-      // This is failing
       this.dataMap.set(fileVolatilityDataPoint.file, {
         file: fileVolatilityDataPoint.file,
         changeFrequency: data.changeFrequency + 1,
@@ -161,6 +152,7 @@ export class AppComponent implements OnInit {
     }
   }
 
+  // Deprecated (to be reintroduced)
   private updateMap(fileVolatilityDataPoint: FileVolatilityDataPoint, prevDataPoint: FileVolatilityDataPoint): FileVolatilityDataPoint {
     fileVolatilityDataPoint.changeFrequency = fileVolatilityDataPoint.changeFrequency + 1;
     fileVolatilityDataPoint.totalLinesChanged += prevDataPoint.totalLinesChanged;
