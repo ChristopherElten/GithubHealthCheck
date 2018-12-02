@@ -48,13 +48,7 @@ export class AppComponent implements OnInit {
     },
 
     xAxis: {
-        gridLineWidth: 1,
-        title: {
-            text: 'Lines of Code (LOC) Changed'
-        },
-        labels: {
-            format: '{value} LOC'
-        }
+      type: 'datetime'
     },
 
     yAxis: {
@@ -73,9 +67,9 @@ export class AppComponent implements OnInit {
         useHTML: true,
         headerFormat: '<table>',
         pointFormat: '<tr><th colspan="2"><h3>{point.file}</h3></th></tr>' +
-            '<tr><th>Fat intake:</th><td>{point.x}g</td></tr>' +
-            '<tr><th>Sugar intake:</th><td>{point.y}g</td></tr>' +
-            '<tr><th>Obesity (adults):</th><td>{point.z}%</td></tr>',
+            '<tr><th>Last Modified Date:</th><td>{point.x}</td></tr>' +
+            '<tr><th>Change Frequency:</th><td>{point.y}</td></tr>' +
+            '<tr><th>Total Lines of Code Changed:</th><td>{point.z}</td></tr>',
         footerFormat: '</table>',
         followPointer: true
     },
@@ -84,11 +78,10 @@ export class AppComponent implements OnInit {
         series: {
             dataLabels: {
                 enabled: true,
-                format: '{point.file}'
+                format: '{point.name}'
             }
         }
     },
-
     series: [{
         data: this.data
     }]
@@ -97,8 +90,10 @@ export class AppComponent implements OnInit {
   updateFromInput = false;
 
   title = 'app';
-  owner = 'angular';
-  repo = 'angular';
+  owner = 'josephroqueca';
+  repo = 'bowling-companion';
+
+  dataMap = new Map<string, FileVolatilityDataPoint>();
 
   constructor(private githubService: GithubService, private http: HttpClient) { }
 
@@ -119,17 +114,60 @@ export class AppComponent implements OnInit {
           getHttpOptions(token)
         )
       ),
-      tap(commit => console.log(commit)),
       map(commit => generateFileVolatilityDataPointsFromCommit(commit)),
       flatMap(fileVolatilityDataPoints => of(...fileVolatilityDataPoints)),
-      map(fileVolatilityDataPoint => generateHighchartsDataFromFileVolatilityDataPoints(fileVolatilityDataPoint))
+      map(fileVolatilityDataPoint => this.upsertMap(fileVolatilityDataPoint))
+      // tap(t => console.log(t.changeFrequency)),
+      // map(fileVolatilityDataPoint => generateHighchartsDataFromFileVolatilityDataPoints(fileVolatilityDataPoint))
     )
     .subscribe((dataPoint: any) => {
-      this.chartOptions.series[0].data.push(dataPoint);
       // this.data.push(dataPoint);
       // nested change - must trigger update
       this.updateFromInput = true;
     });
+  }
+
+  debugTest() {
+    // debugger;
+    this.generateDataFromMap();
+  }
+
+  private generateDataFromMap() {
+    this.dataMap.forEach(fileVolatilityDataPoint =>
+      this.data.push(generateHighchartsDataFromFileVolatilityDataPoints(fileVolatilityDataPoint)));
+
+    this.updateFromInput = true;
+  }
+
+  private upsertMap(fileVolatilityDataPoint: FileVolatilityDataPoint): FileVolatilityDataPoint {
+    const data = this.dataMap.get(fileVolatilityDataPoint.file);
+
+    if (!data) {
+      console.log('new data set for: ', fileVolatilityDataPoint.file);
+      this.dataMap.set(fileVolatilityDataPoint.file, fileVolatilityDataPoint);
+      return fileVolatilityDataPoint;
+    } else {
+      console.log('dup entry attempt on: ', fileVolatilityDataPoint.file);
+      // This is failing
+      this.dataMap.set(fileVolatilityDataPoint.file, {
+        file: fileVolatilityDataPoint.file,
+        changeFrequency: data.changeFrequency + 1,
+        lastModifiedDate: fileVolatilityDataPoint.lastModifiedDate,
+        totalLinesChanged: fileVolatilityDataPoint.totalLinesChanged + data.totalLinesChanged,
+        contributorCount: 1,
+        contributors: []
+      });
+      return fileVolatilityDataPoint;
+    }
+  }
+
+  private updateMap(fileVolatilityDataPoint: FileVolatilityDataPoint, prevDataPoint: FileVolatilityDataPoint): FileVolatilityDataPoint {
+    fileVolatilityDataPoint.changeFrequency = fileVolatilityDataPoint.changeFrequency + 1;
+    fileVolatilityDataPoint.totalLinesChanged += prevDataPoint.totalLinesChanged;
+    // This is failing
+    // this.dataMap.delete(fileVolatilityDataPoint.file);
+    this.dataMap.set(fileVolatilityDataPoint.file, fileVolatilityDataPoint);
+    return fileVolatilityDataPoint;
   }
 }
 
@@ -139,7 +177,7 @@ const apiBaseUrl = 'https://api.github.com';
 function getCommitsOnRepoApiUrl(owner: string, repo: string): string {
   // GET /repos/:owner/:repo/commits
   // https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository
-  return `${apiBaseUrl}/repos/${owner}/${repo}/commits?per_page=2`;
+  return `${apiBaseUrl}/repos/${owner}/${repo}/commits?per_page=50`;
 }
 
 function getCommitApiUrl(owner: string, repo: string, sha: string): string {
@@ -174,7 +212,8 @@ function generateFileVolatilityDataPointsFromCommit(commit): FileVolatilityDataP
     arr.push({
       totalLinesChanged: file.changes,
       file: file.filename,
-      lastModifiedDate: Date.parse(lastModifiedDate)
+      lastModifiedDate: Date.parse(lastModifiedDate),
+      changeFrequency: 1
     });
   });
 
@@ -184,9 +223,9 @@ function generateFileVolatilityDataPointsFromCommit(commit): FileVolatilityDataP
 function generateHighchartsDataFromFileVolatilityDataPoints(fileVolatilityDataPoint: FileVolatilityDataPoint) {
   return {
     x: fileVolatilityDataPoint.lastModifiedDate,
-    y: 10/* fileVolatilityDataPoint.changeFrequency */,
+    y: fileVolatilityDataPoint.changeFrequency,
     z: fileVolatilityDataPoint.totalLinesChanged,
-    name: 'tempNameToParseFromFile',
+    name: fileVolatilityDataPoint.file.split('/').reverse()[0],
     file: fileVolatilityDataPoint.file
   };
 }
