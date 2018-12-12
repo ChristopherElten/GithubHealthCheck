@@ -6,11 +6,13 @@ import { AppComponent } from './app.component';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { AppRoutingModule } from './/app-routing.module';
 import { RepoDashboardComponent } from './repo-dashboard/repo-dashboard.component';
+import { FileVolatilityComponent } from './file-volatility/file-volatility.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    RepoDashboardComponent
+    RepoDashboardComponent,
+    FileVolatilityComponent
   ],
   imports: [
     BrowserModule,
