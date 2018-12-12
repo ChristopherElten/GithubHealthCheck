@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { RepoDashboardComponent } from './repo-dashboard/repo-dashboard.component';
 
 const routes: Routes = [
-  { path: 'ngTest', component: RepoDashboardComponent }
+  { path: ':owner/:repo', component: RepoDashboardComponent }
 ];
 
 @NgModule({
