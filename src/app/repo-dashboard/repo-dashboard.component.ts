@@ -14,6 +14,7 @@ import { FileVolatilityDataPoint, FileVolatilityComponent } from '../file-volati
   styleUrls: ['./repo-dashboard.component.css']
 })
 export class RepoDashboardComponent implements OnInit {
+  // todo - push frequency/commit frequency/code frequency
   @ViewChild(FileVolatilityComponent) fileVolatilityComponent: FileVolatilityComponent;
 
   owner: string;
