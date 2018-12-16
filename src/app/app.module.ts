@@ -7,12 +7,14 @@ import { HighchartsChartModule } from 'highcharts-angular';
 import { AppRoutingModule } from './/app-routing.module';
 import { RepoDashboardComponent } from './repo-dashboard/repo-dashboard.component';
 import { FileVolatilityComponent } from './file-volatility/file-volatility.component';
+import { ExperimentPageComponent } from './experiment-page/experiment-page.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     RepoDashboardComponent,
-    FileVolatilityComponent
+    FileVolatilityComponent,
+    ExperimentPageComponent
   ],
   imports: [
     BrowserModule,
