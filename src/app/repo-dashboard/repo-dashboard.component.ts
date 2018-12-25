@@ -44,7 +44,6 @@ export class RepoDashboardComponent implements OnInit {
       flatMap(fileVolatilityDataPoints => of(...fileVolatilityDataPoints)),
       map(fileVolatilityDataPoint => this.fileVolatilityComponent.addPointToChart(fileVolatilityDataPoint))
     )
-    // Uncomment this to make too many requests
     .subscribe();
   }
 }

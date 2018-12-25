@@ -3,7 +3,6 @@ import * as Highcharts from 'highcharts';
 import HC_more from 'highcharts/highcharts-more';
 import { pipe, from, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-// import { HighchartsChartComponent } from 'highcharts-angular';
 HC_more(Highcharts);
 
 export interface FileVolatilityDataPoint {
@@ -21,7 +20,6 @@ export interface FileVolatilityDataPoint {
   styleUrls: ['./file-volatility.component.css']
 })
 export class FileVolatilityComponent implements OnInit {
-  // @ViewChild(HighchartsChartComponent) highchartsChartComponent: HighchartsChartComponent;
   @Input() repo: string;
   @Input() owner: string;
 
@@ -141,7 +139,6 @@ export class FileVolatilityComponent implements OnInit {
 
     this.updateFromInput = true;
   }
-
 }
 
 function generateHighchartsDataFromFileVolatilityDataPoints(fileVolatilityDataPoint: FileVolatilityDataPoint): {} {
