@@ -73,26 +73,8 @@ export class ExperimentPageComponent implements OnInit {
       map(res => parse(res))
     )
     .subscribe((commitData: CommitData) => {
-      // Map Date to
       this.constructDataSeriesFromCommitData(commitData);
       this.updateFromInput = true;
-      // this.data = [
-      //   [
-      //   '2018-11-13 23:52:44 -0800',
-      //   'docs(common): fix documentation for getLocaleCurrencyName (#27087) PR Close #27087'
-      //   ],
-      //   [
-      //     '2018-11-13 23:52:44 -0800',
-      //     'docs(common): fix documentation for getLocaleCurrencyName (#27087) PR Close #27087'
-      //   ]];
-      //   this.updateFromInput = true;
-        // console.log(commitData);
-        // this.data.push(1);
-        // this.data.push(3);
-        // this.updateFromInput = true;
-        // this.data = [1, 4, 5, 5, 6];
-        // this.chartOptions.series[0].data = [1, 4, 5, 6];
-        // this.updateFromInput = true;
     });
   }
 
@@ -107,13 +89,13 @@ export class ExperimentPageComponent implements OnInit {
     // Take each year, get the week of the year and map it
     this.dataMap.get(2018).forEach(el => this.updateWeekData(this.findWeekofYearOfDate(el[2])));
     // Update data
-    this.tempData[0] = 0;
     this.chartOptions.series[0].data = this.tempData;
   }
 
   updateWeekData(weekNumber: number): void {
-    this.tempData[weekNumber] = this.tempData[weekNumber] ? this.tempData[weekNumber] + 1 : 1;
-    return weekNumber ? null : console.log(weekNumber);
+    // Week number - 1
+    // Because the array index starts at 0 but the week number starts at 1
+    this.tempData[weekNumber - 1] = this.tempData[weekNumber - 1] ? this.tempData[weekNumber - 1] + 1 : 1;
   }
 
   upsertMap(commit): any [][] {
@@ -121,8 +103,6 @@ export class ExperimentPageComponent implements OnInit {
     const res: any [] = this.dataMap.get(key) || [];
     res.push(commit);
     this.dataMap.set(key, res);
-
-    // console.log('Upsert Map: ', res);
     return res;
   }
 
@@ -138,6 +118,6 @@ export class ExperimentPageComponent implements OnInit {
     // /60 => convert from minutes to hours
     // /24 => convert from hours to days
     // /7 => convert from days to weeks
-    return Math.floor((lastDateInYearAsNumber - currentDateAsNumber) / 1000 / 60 / 60 / 24 / 7);
+    return Math.floor(52 - (lastDateInYearAsNumber - currentDateAsNumber) / 1000 / 60 / 60 / 24 / 7);
   }
 }
