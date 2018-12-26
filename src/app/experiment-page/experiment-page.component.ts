@@ -23,12 +23,12 @@ export class ExperimentPageComponent implements OnInit {
   // grouped by year
   // ordered array, from latest date to most recent
   dataMap = new Map<number, any []>();
-  data: any = [];
-  tempData = [];
+  tempData = new Array(52).fill(0);
   updateFromInput = false;
 
   // Highchart things
   Highcharts = Highcharts;
+  chart: any;
   chartOptions = {
     chart: {
         type: 'column'
@@ -58,11 +58,7 @@ export class ExperimentPageComponent implements OnInit {
             borderWidth: 0
         }
     },
-    series: [
-      {
-        data: this.data
-      }
-    ]
+    series: []
   };
 
   constructor(private http: HttpClient) { }
@@ -84,9 +80,14 @@ export class ExperimentPageComponent implements OnInit {
     // Key of map is the date
     commitData.data.forEach((data) => this.upsertMap(data));
     // Take each year, get the week of the year and map it
-    this.dataMap.get(2018).forEach(el => this.updateWeekData(this.findWeekofYearOfDate(el[2])));
-    // Update data
-    this.chartOptions.series[0].data = this.tempData;
+    this.dataMap.forEach((yearData: any [], key: number) => {
+      yearData.forEach(el =>
+        this.updateWeekData(this.findWeekOfYearOfDate(el[2]))
+      );
+      // Update data
+      this.chart.addSeries({ name: key, data: this.tempData });
+      this.tempData = new Array(52).fill(0);
+    });
   }
 
   updateWeekData(weekNumber: number): void {
@@ -103,11 +104,17 @@ export class ExperimentPageComponent implements OnInit {
     return res;
   }
 
+  getInstance(chart): void {
+    // chart instance
+    this.chart = chart;
+  }
+
   private getFile(): Observable<any> {
     return this.http.get('./../../assets/commits.local.csv', { responseType: 'text' });
   }
 
-  private findWeekofYearOfDate(currentDate: string) {
+  private findWeekOfYearOfDate(currentDate: string) {
+    // Get last day (Dec. 31) or the year of the passed in date
     const lastDateInYearAsNumber = new Date(new Date(currentDate).getFullYear(), 11, 31).getTime();
     const currentDateAsNumber = Date.parse(currentDate);
     // /1000 => convert from milliseconds to seconds
