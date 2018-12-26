@@ -82,9 +82,6 @@ export class ExperimentPageComponent implements OnInit {
     // Construct data of form [data, value]
     // Value is count of commits in a given week
     // Key of map is the date
-    // commitData.data.forEach((data, i) => this.upsertMap(Math.floor(this.findWeekofYearOfDate(Date.parse(data[3])))));
-    // this.dataMap.forEach((val: number, key: number) => this.data.push([key, val]));
-
     commitData.data.forEach((data) => this.upsertMap(data));
     // Take each year, get the week of the year and map it
     this.dataMap.get(2018).forEach(el => this.updateWeekData(this.findWeekofYearOfDate(el[2])));
@@ -111,7 +108,7 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   private findWeekofYearOfDate(currentDate: string) {
-    const lastDateInYearAsNumber = Date.parse('2018-12-21T23:59:59Z');
+    const lastDateInYearAsNumber = new Date(new Date(currentDate).getFullYear(), 11, 31).getTime();
     const currentDateAsNumber = Date.parse(currentDate);
     // /1000 => convert from milliseconds to seconds
     // /60 => convert from seconds to minutes
