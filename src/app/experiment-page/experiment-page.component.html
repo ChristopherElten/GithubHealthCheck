@@ -5,3 +5,5 @@
   [callbackFunction]="getInstance.bind(this)"
   [(update)]="updateFromInput"
   ></highcharts-chart>
+
+  <div *ngFor="let titleInfo of titles">{{ titleInfo }}</div>

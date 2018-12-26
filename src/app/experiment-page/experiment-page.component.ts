@@ -18,12 +18,15 @@ export interface CommitData {
   styleUrls: ['./experiment-page.component.css']
 })
 export class ExperimentPageComponent implements OnInit {
+  // Titles to display in dashboard
+  titles = [];
+
   // TODO - define interface for commit obj
   // Buckets of commits
   // grouped by year
   // ordered array, from latest date to most recent
   dataMap = new Map<number, any []>();
-  tempData = new Array(52).fill(0);
+  tempData = this.getEmptyArrForYearByWeek();
   updateFromInput = false;
 
   // Highchart things
@@ -84,9 +87,18 @@ export class ExperimentPageComponent implements OnInit {
       yearData.forEach(el =>
         this.updateWeekData(this.findWeekOfYearOfDate(el[2]))
       );
-      // Update data
+      // Update column chart series data
       this.chart.addSeries({ name: key, data: this.tempData });
-      this.tempData = new Array(52).fill(0);
+
+      // Update Titles with overview
+      // Count commits
+      let count = 0;
+      this.tempData.forEach((weeklyCommitCount: number) => count += weeklyCommitCount);
+      this.titles.push(key + ' : ' + count);
+
+      // Clear data
+      count = 0;
+      this.tempData = this.getEmptyArrForYearByWeek();
     });
   }
 
@@ -107,6 +119,10 @@ export class ExperimentPageComponent implements OnInit {
   getInstance(chart): void {
     // chart instance
     this.chart = chart;
+  }
+
+  private getEmptyArrForYearByWeek(): number [] {
+    return new Array(52).fill(0);
   }
 
   private getFile(): Observable<any> {
