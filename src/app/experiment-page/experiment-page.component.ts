@@ -94,7 +94,8 @@ export class ExperimentPageComponent implements OnInit {
       // Count commits
       let count = 0;
       this.tempData.forEach((weeklyCommitCount: number) => count += weeklyCommitCount);
-      this.titles.push(key + ' : ' + count);
+      // TODO - Make titles into card components
+      this.titles.push(`${key} had ${count} commits.`);
 
       // Clear data
       count = 0;
