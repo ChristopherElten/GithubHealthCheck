@@ -12,14 +12,20 @@ export interface CommitData {
   errors: any []; // [{ type: string, code: string, index: number, row: number, message: string }]
 }
 
+export interface YearlyDataOverviewObject {
+  message: string;
+  commitKeysMap: Map<string, number>;
+}
+
 @Component({
   selector: 'app-experiment-page',
   templateUrl: './experiment-page.component.html',
   styleUrls: ['./experiment-page.component.css']
 })
 export class ExperimentPageComponent implements OnInit {
-  // Titles to display in dashboard
-  titles = [];
+  // yearlyDataOverviewObject to display in dashboard
+  yearlyDataOverviewObjects: YearlyDataOverviewObject [] = [];
+  commitSet = new Set<string>();
 
   // TODO - define interface for commit obj
   // Buckets of commits
@@ -81,12 +87,15 @@ export class ExperimentPageComponent implements OnInit {
     // Construct data of form [data, value]
     // Value is count of commits in a given week
     // Key of map is the date
-    commitData.data.forEach((data) => this.upsertMap(data));
+    commitData.data.forEach((data) => this.upsertArrMap(data));
     // Take each year, get the week of the year and map it
     this.dataMap.forEach((yearData: any [], key: number) => {
-      yearData.forEach(el =>
-        this.updateWeekData(this.findWeekOfYearOfDate(el[2]))
-      );
+      const commitMessageKeysMap = new Map<string, number>();
+      yearData.forEach(el => {
+        // Bucket commits based on message
+        this.upsertNumMap(el[3].trim().split(/,|\(|:| /, 1)[0].toLowerCase(), commitMessageKeysMap);
+        this.updateWeekData(this.findWeekOfYearOfDate(el[2]));
+      });
       // Update column chart series data
       this.chart.addSeries({ name: key, data: this.tempData });
 
@@ -95,10 +104,13 @@ export class ExperimentPageComponent implements OnInit {
       let count = 0;
       this.tempData.forEach((weeklyCommitCount: number) => count += weeklyCommitCount);
       // TODO - Make titles into card components
-      this.titles.push(`${key} had ${count} commits.`);
+      this.yearlyDataOverviewObjects.push(
+        {
+          message: `${key} had ${count} commits. From commits in ${commitMessageKeysMap}`,
+          commitKeysMap: commitMessageKeysMap
+        });
 
       // Clear data
-      count = 0;
       this.tempData = this.getEmptyArrForYearByWeek();
     });
   }
@@ -109,12 +121,17 @@ export class ExperimentPageComponent implements OnInit {
     this.tempData[weekNumber - 1] = this.tempData[weekNumber - 1] ? this.tempData[weekNumber - 1] + 1 : 1;
   }
 
-  upsertMap(commit): any [][] {
-    const key: number = new Date(commit[2]).getFullYear();
+  // TODO - Make these helper methods
+  upsertArrMap(arr: any []): any [][] {
+    const key: number = new Date(arr[2]).getFullYear();
     const res: any [] = this.dataMap.get(key) || [];
-    res.push(commit);
+    res.push(arr);
     this.dataMap.set(key, res);
     return res;
+  }
+
+  upsertNumMap(key: string, numMap: Map<string, number>) {
+    numMap.set(key, (numMap.get(key) || 0) + 1);
   }
 
   getInstance(chart): void {

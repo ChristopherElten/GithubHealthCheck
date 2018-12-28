@@ -6,4 +6,9 @@
   [(update)]="updateFromInput"
   ></highcharts-chart>
 
-  <div *ngFor="let titleInfo of titles">{{ titleInfo }}</div>
+  <div *ngFor="let yearlyDataOverviewObject of yearlyDataOverviewObjects">
+    {{ yearlyDataOverviewObject.message }}
+    <div *ngFor="let commitMap of yearlyDataOverviewObject.commitKeysMap | keyvalue">
+      <button>{{ commitMap.key }}: {{ commitMap.value }} Occurances</button>
+    </div>
+  </div>
