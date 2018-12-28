@@ -7,6 +7,16 @@ import HC_more from 'highcharts/highcharts-more';
 import { map } from 'rxjs/operators';
 HC_more(Highcharts);
 
+// TODO
+// View by week, month, day
+// View by lines of code* Requires more data
+// Filter by commit key(s) (e.g. fix)
+// Filter by author(s)
+//
+// Get high level res such as
+// - Commits per year
+// - Avg commits per week
+// - Lines of code per year
 export interface CommitData {
   data: string [][]; // [[ hash: string ], [author: string], [date: string], [message: string]]
   errors: any []; // [{ type: string, code: string, index: number, row: number, message: string }]
@@ -16,6 +26,7 @@ export interface YearlyDataOverviewObject {
   year: number;
   message: string;
   commitKeysMap: Map<string, number>;
+  authorKeysMap: Map<string, number>;
 }
 
 @Component({
@@ -91,10 +102,12 @@ export class ExperimentPageComponent implements OnInit {
     commitData.data.forEach((data) => this.upsertArrMap(data));
     // Take each year, get the week of the year and map it
     this.dataMap.forEach((yearData: any [], key: number) => {
-      const commitMessageKeysMap = new Map<string, number>();
+      const commitKeysMap = new Map<string, number>();
+      const authorKeysMap = new Map<string, number>();
       yearData.forEach(el => {
         // Bucket commits based on message
-        this.upsertNumMap(el[3].trim().split(/,|\(|:| /, 1)[0].toLowerCase(), commitMessageKeysMap);
+        this.upsertNumMap(el[3].trim().split(/,|\(|:| /, 1)[0].toLowerCase(), commitKeysMap);
+        this.upsertNumMap(el[1], authorKeysMap);
         this.updateWeekData(this.findWeekOfYearOfDate(el[2]));
       });
       // Update column chart series data
@@ -108,8 +121,9 @@ export class ExperimentPageComponent implements OnInit {
       this.yearlyDataOverviewObjects.push(
         {
           year: key,
-          message: `${key} had ${count} commits. From commits in ${commitMessageKeysMap}`,
-          commitKeysMap: commitMessageKeysMap
+          message: `${key} had ${count} commits. From commits in ${commitKeysMap}`,
+          commitKeysMap: commitKeysMap,
+          authorKeysMap: authorKeysMap
         });
 
       // Clear data
@@ -141,8 +155,12 @@ export class ExperimentPageComponent implements OnInit {
     this.chart = chart;
   }
 
-  sortGraph(val) {
-    console.log(val);
+  sortGraphByCommitType(year: number, commitKey: string): void {
+    console.log(year, commitKey);
+  }
+
+  sortGraphByAuthor(year: number, author: string): void {
+    console.log(year, author);
   }
 
   private getEmptyArrForYearByWeek(): number [] {
