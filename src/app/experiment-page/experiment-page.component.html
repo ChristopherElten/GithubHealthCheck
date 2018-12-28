@@ -7,8 +7,8 @@
   ></highcharts-chart>
 
   <div *ngFor="let yearlyDataOverviewObject of yearlyDataOverviewObjects">
-    {{ yearlyDataOverviewObject.message }}
+      {{ yearlyDataOverviewObject.year }}{{ yearlyDataOverviewObject.message }}
     <div *ngFor="let commitMap of yearlyDataOverviewObject.commitKeysMap | keyvalue">
-      <button>{{ commitMap.key }}: {{ commitMap.value }} Occurances</button>
+      <button (click)="sortGraph(commitMap.key)">{{ commitMap.key }}: {{ commitMap.value }} Occurances</button>
     </div>
   </div>

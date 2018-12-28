@@ -13,6 +13,7 @@ export interface CommitData {
 }
 
 export interface YearlyDataOverviewObject {
+  year: number;
   message: string;
   commitKeysMap: Map<string, number>;
 }
@@ -106,6 +107,7 @@ export class ExperimentPageComponent implements OnInit {
       // TODO - Make titles into card components
       this.yearlyDataOverviewObjects.push(
         {
+          year: key,
           message: `${key} had ${count} commits. From commits in ${commitMessageKeysMap}`,
           commitKeysMap: commitMessageKeysMap
         });
@@ -137,6 +139,10 @@ export class ExperimentPageComponent implements OnInit {
   getInstance(chart): void {
     // chart instance
     this.chart = chart;
+  }
+
+  sortGraph(val) {
+    console.log(val);
   }
 
   private getEmptyArrForYearByWeek(): number [] {
