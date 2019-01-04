@@ -13,6 +13,6 @@
   </div>
   <hr>
   <div *ngFor="let authorMap of yearlyDataOverviewObject.authorKeysMap | keyvalue">
-      <button (click)="sortGraph(yearlyDataOverviewObject.year, authorMap.key)">{{ authorMap.key }}: {{ authorMap.value }} Occurances</button>
+      <button (click)="sortGraphByAuthor(yearlyDataOverviewObject.year, authorMap.key)">{{ authorMap.key }}: {{ authorMap.value }} Occurances</button>
     </div>
 </div>

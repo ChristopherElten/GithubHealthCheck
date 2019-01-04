@@ -43,8 +43,11 @@ export class ExperimentPageComponent implements OnInit {
   // Buckets of commits
   // grouped by year
   // ordered array, from latest date to most recent
-  dataMap = new Map<number, any []>();
+  // dataMap = new Map<number, any []>();
   tempData = this.getEmptyArrForYearByWeek();
+  commitData: any;
+  filterFunctions: ((el) => boolean) [] = [];
+
   updateFromInput = false;
 
   // Highchart things
@@ -90,25 +93,30 @@ export class ExperimentPageComponent implements OnInit {
       map(res => parse(res))
     )
     .subscribe((commitData: CommitData) => {
-      this.constructDataSeriesFromCommitData(commitData);
+      this.commitData = commitData;
+      this.constructDataSeriesFromCommitData(commitData.data);
       this.updateFromInput = true;
     });
   }
 
-  private constructDataSeriesFromCommitData(commitData: CommitData): void {
+  private constructDataSeriesFromCommitData(data: string[][]): void {
+    const dataMap = new Map<number, any []>();
     // Construct data of form [data, value]
     // Value is count of commits in a given week
     // Key of map is the date
-    commitData.data.forEach((data) => this.upsertArrMap(data));
+    data.forEach((dataPoint) => this.upsertArrMap(dataPoint, dataMap));
     // Take each year, get the week of the year and map it
-    this.dataMap.forEach((yearData: any [], key: number) => {
+    dataMap.forEach((yearData: any [], key: number) => {
       const commitKeysMap = new Map<string, number>();
       const authorKeysMap = new Map<string, number>();
       yearData.forEach(el => {
-        // Bucket commits based on message
+        // Bucket commits by type (based on message)
         this.upsertNumMap(el[3].trim().split(/,|\(|:| /, 1)[0].toLowerCase(), commitKeysMap);
+        // Bucket commits by author
         this.upsertNumMap(el[1], authorKeysMap);
-        this.updateWeekData(this.findWeekOfYearOfDate(el[2]));
+        if (this.checkAppliedFilters(el)) {
+          this.updateWeekData(this.findWeekOfYearOfDate(el[2]));
+        }
       });
       // Update column chart series data
       this.chart.addSeries({ name: key, data: this.tempData });
@@ -138,11 +146,11 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   // TODO - Make these helper methods
-  upsertArrMap(arr: any []): any [][] {
+  upsertArrMap(arr: any [], arrMap: Map<number, string []>): any [][] {
     const key: number = new Date(arr[2]).getFullYear();
-    const res: any [] = this.dataMap.get(key) || [];
+    const res: any [] = arrMap.get(key) || [];
     res.push(arr);
-    this.dataMap.set(key, res);
+    arrMap.set(key, res);
     return res;
   }
 
@@ -157,10 +165,32 @@ export class ExperimentPageComponent implements OnInit {
 
   sortGraphByCommitType(year: number, commitKey: string): void {
     console.log(year, commitKey);
+    this.filterFunctions.push(el => (el[2] as string).indexOf(commitKey) > 0);
   }
 
   sortGraphByAuthor(year: number, author: string): void {
-    console.log(year, author);
+    // this.filterFunctions.push(el => {
+    //     if (el[1] === author) {
+    //       console.log(el[1], ' : ', author);
+    //     }
+    //     // console.log(author);
+    //     return el[1] === author;
+    //   });
+    this.clearDataSeries();
+    this.yearlyDataOverviewObjects = [];
+    this.commitData.data = this.commitData.data.filter(el => el[1] === author);
+    this.constructDataSeriesFromCommitData(this.commitData.data);
+    this.updateFromInput = true;
+  }
+
+  private clearDataSeries() {
+    while (this.chart.series.length) {
+      this.chart.series[0].remove(false);
+    }
+  }
+
+  private checkAppliedFilters(commit): boolean {
+    return this.filterFunctions.length < 1 || this.filterFunctions.some(func => func(commit));
   }
 
   private getEmptyArrForYearByWeek(): number [] {
