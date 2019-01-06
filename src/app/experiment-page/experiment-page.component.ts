@@ -46,6 +46,7 @@ export class ExperimentPageComponent implements OnInit {
   // dataMap = new Map<number, any []>();
   tempData = this.getEmptyArrForYearByWeek();
   commitData: any;
+  // Deprecated
   filterFunctions: ((el) => boolean) [] = [];
 
   updateFromInput = false;
@@ -114,9 +115,7 @@ export class ExperimentPageComponent implements OnInit {
         this.upsertNumMap(this.getCommitKeyFromCommitMessage(el[3]), commitKeysMap);
         // Bucket commits by author
         this.upsertNumMap(el[1], authorKeysMap);
-        if (this.checkAppliedFilters(el)) {
-          this.updateWeekData(this.findWeekOfYearOfDate(el[2]));
-        }
+        this.updateWeekData(this.findWeekOfYearOfDate(el[2]));
       });
       // Update column chart series data
       this.chart.addSeries({ name: key, data: this.tempData });
@@ -170,9 +169,6 @@ export class ExperimentPageComponent implements OnInit {
     this.commitData.data = this.commitData.data.filter(el => this.getCommitKeyFromCommitMessage(el[3]) === commitKey);
     this.constructDataSeriesFromCommitData(this.commitData.data);
     this.updateFromInput = true;
-
-    // console.log(year, commitKey);
-    // this.filterFunctions.push(el => (el[2] as string).indexOf(commitKey) > 0);
   }
 
   sortGraphByAuthor(year: number, author: string): void {
@@ -191,10 +187,6 @@ export class ExperimentPageComponent implements OnInit {
     while (this.chart.series.length) {
       this.chart.series[0].remove(false);
     }
-  }
-
-  private checkAppliedFilters(commit): boolean {
-    return this.filterFunctions.length < 1 || this.filterFunctions.some(func => func(commit));
   }
 
   private getEmptyArrForYearByWeek(): number [] {
