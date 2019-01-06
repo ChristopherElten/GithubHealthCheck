@@ -111,7 +111,7 @@ export class ExperimentPageComponent implements OnInit {
       const authorKeysMap = new Map<string, number>();
       yearData.forEach(el => {
         // Bucket commits by type (based on message)
-        this.upsertNumMap(el[3].trim().split(/,|\(|:| /, 1)[0].toLowerCase(), commitKeysMap);
+        this.upsertNumMap(this.getCommitKeyFromCommitMessage(el[3]), commitKeysMap);
         // Bucket commits by author
         this.upsertNumMap(el[1], authorKeysMap);
         if (this.checkAppliedFilters(el)) {
@@ -164,23 +164,27 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   sortGraphByCommitType(year: number, commitKey: string): void {
-    console.log(year, commitKey);
-    this.filterFunctions.push(el => (el[2] as string).indexOf(commitKey) > 0);
+
+    this.clearDataSeries();
+    this.yearlyDataOverviewObjects = [];
+    this.commitData.data = this.commitData.data.filter(el => this.getCommitKeyFromCommitMessage(el[3]) === commitKey);
+    this.constructDataSeriesFromCommitData(this.commitData.data);
+    this.updateFromInput = true;
+
+    // console.log(year, commitKey);
+    // this.filterFunctions.push(el => (el[2] as string).indexOf(commitKey) > 0);
   }
 
   sortGraphByAuthor(year: number, author: string): void {
-    // this.filterFunctions.push(el => {
-    //     if (el[1] === author) {
-    //       console.log(el[1], ' : ', author);
-    //     }
-    //     // console.log(author);
-    //     return el[1] === author;
-    //   });
     this.clearDataSeries();
     this.yearlyDataOverviewObjects = [];
     this.commitData.data = this.commitData.data.filter(el => el[1] === author);
     this.constructDataSeriesFromCommitData(this.commitData.data);
     this.updateFromInput = true;
+  }
+
+  private getCommitKeyFromCommitMessage(commitMessage: string): string {
+    return commitMessage.trim().split(/,|\(|:| /, 1)[0].toLowerCase();
   }
 
   private clearDataSeries() {
