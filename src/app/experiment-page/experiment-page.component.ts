@@ -29,6 +29,11 @@ export interface YearlyDataOverviewObject {
   authorKeysMap: Map<string, number>;
 }
 
+export enum XAxisOptions {
+  MONTH = 'month',
+  WEEK = 'week'
+}
+
 @Component({
   selector: 'app-experiment-page',
   templateUrl: './experiment-page.component.html',
@@ -44,10 +49,8 @@ export class ExperimentPageComponent implements OnInit {
   // grouped by year
   // ordered array, from latest date to most recent
   // dataMap = new Map<number, any []>();
-  tempData = this.getEmptyArrForYearByWeek();
   commitData: any;
-  // Deprecated
-  filterFunctions: ((el) => boolean) [] = [];
+  xAxisOption: XAxisOptions = XAxisOptions.WEEK;
 
   updateFromInput = false;
 
@@ -89,6 +92,8 @@ export class ExperimentPageComponent implements OnInit {
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
+
+
     this.getFile()
     .pipe(
       map(res => parse(res))
@@ -101,6 +106,7 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   private constructDataSeriesFromCommitData(data: string[][]): void {
+    let tempData = this.getEmptyArray();
     const dataMap = new Map<number, any []>();
     // Construct data of form [data, value]
     // Value is count of commits in a given week
@@ -115,15 +121,15 @@ export class ExperimentPageComponent implements OnInit {
         this.upsertNumMap(this.getCommitKeyFromCommitMessage(el[3]), commitKeysMap);
         // Bucket commits by author
         this.upsertNumMap(el[1], authorKeysMap);
-        this.updateWeekData(this.findWeekOfYearOfDate(el[2]));
+        this.incrementArrayEntry(this.findWeekOfYearOfDate(el[2]) - 1, tempData);
       });
       // Update column chart series data
-      this.chart.addSeries({ name: key, data: this.tempData });
+      this.chart.addSeries({ name: key, data: tempData });
 
       // Update Titles with overview
       // Count commits
       let count = 0;
-      this.tempData.forEach((weeklyCommitCount: number) => count += weeklyCommitCount);
+      tempData.forEach((weeklyCommitCount: number) => count += weeklyCommitCount);
       // TODO - Make titles into card components
       this.yearlyDataOverviewObjects.push(
         {
@@ -134,14 +140,14 @@ export class ExperimentPageComponent implements OnInit {
         });
 
       // Clear data
-      this.tempData = this.getEmptyArrForYearByWeek();
+      tempData = this.getEmptyArray();
     });
   }
 
-  updateWeekData(weekNumber: number): void {
+  incrementArrayEntry(index: number, array: any []): void {
     // Week number - 1
     // Because the array index starts at 0 but the week number starts at 1
-    this.tempData[weekNumber - 1] = this.tempData[weekNumber - 1] ? this.tempData[weekNumber - 1] + 1 : 1;
+    array[index] = array[index] ? array[index] + 1 : 1;
   }
 
   // TODO - Make these helper methods
@@ -163,7 +169,6 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   sortGraphByCommitType(year: number, commitKey: string): void {
-
     this.clearDataSeries();
     this.yearlyDataOverviewObjects = [];
     this.commitData.data = this.commitData.data.filter(el => this.getCommitKeyFromCommitMessage(el[3]) === commitKey);
@@ -189,8 +194,13 @@ export class ExperimentPageComponent implements OnInit {
     }
   }
 
-  private getEmptyArrForYearByWeek(): number [] {
-    return new Array(52).fill(0);
+  private getEmptyArray(): number [] {
+    switch (this.xAxisOption) {
+      case XAxisOptions.MONTH:
+        return new Array(12).fill(0);
+      case XAxisOptions.WEEK:
+        return new Array(52).fill(0);
+    }
   }
 
   private getFile(): Observable<any> {
