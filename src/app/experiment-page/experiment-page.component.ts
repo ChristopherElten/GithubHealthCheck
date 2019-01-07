@@ -49,8 +49,10 @@ export class ExperimentPageComponent implements OnInit {
   // grouped by year
   // ordered array, from latest date to most recent
   // dataMap = new Map<number, any []>();
+  // OTHER
+  // Mass GIT meta data editor
   commitData: any;
-  xAxisOption: XAxisOptions = XAxisOptions.WEEK;
+  xAxisOption: XAxisOptions = XAxisOptions.MONTH;
 
   updateFromInput = false;
 
@@ -92,8 +94,6 @@ export class ExperimentPageComponent implements OnInit {
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
-
-
     this.getFile()
     .pipe(
       map(res => parse(res))
@@ -121,7 +121,9 @@ export class ExperimentPageComponent implements OnInit {
         this.upsertNumMap(this.getCommitKeyFromCommitMessage(el[3]), commitKeysMap);
         // Bucket commits by author
         this.upsertNumMap(el[1], authorKeysMap);
-        this.incrementArrayEntry(this.findWeekOfYearOfDate(el[2]) - 1, tempData);
+      // Week number - 1
+      // Because the array index starts at 0 but the week number starts at 1
+        this.incrementArrayEntry(this.findIndexFromData(el[2]) - 1, tempData);
       });
       // Update column chart series data
       this.chart.addSeries({ name: key, data: tempData });
@@ -145,8 +147,6 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   incrementArrayEntry(index: number, array: any []): void {
-    // Week number - 1
-    // Because the array index starts at 0 but the week number starts at 1
     array[index] = array[index] ? array[index] + 1 : 1;
   }
 
@@ -207,7 +207,7 @@ export class ExperimentPageComponent implements OnInit {
     return this.http.get('./../../assets/commits.local.csv', { responseType: 'text' });
   }
 
-  private findWeekOfYearOfDate(currentDate: string) {
+  private findWeekOfYear(currentDate: string): number {
     // Get last day (Dec. 31) or the year of the passed in date
     const lastDateInYearAsNumber = new Date(new Date(currentDate).getFullYear(), 11, 31).getTime();
     const currentDateAsNumber = Date.parse(currentDate);
@@ -217,5 +217,18 @@ export class ExperimentPageComponent implements OnInit {
     // /24 => convert from hours to days
     // /7 => convert from days to weeks
     return Math.floor(52 - (lastDateInYearAsNumber - currentDateAsNumber) / 1000 / 60 / 60 / 24 / 7);
+  }
+
+  private findMonthOfYear(currentDate: string): number {
+    return new Date(currentDate).getMonth() + 1;
+  }
+
+  private findIndexFromData(currentDate: string): number {
+    switch (this.xAxisOption) {
+      case XAxisOptions.MONTH:
+        return this.findMonthOfYear(currentDate);
+      case XAxisOptions.WEEK:
+        return this.findWeekOfYear(currentDate);
+  }
   }
 }
