@@ -52,7 +52,7 @@ export class ExperimentPageComponent implements OnInit {
   // OTHER
   // Mass GIT meta data editor
   commitData: any;
-  xAxisOption: XAxisOptions = XAxisOptions.MONTH;
+  xAxisOption: XAxisOptions = XAxisOptions.WEEK;
 
   updateFromInput = false;
 
@@ -123,7 +123,7 @@ export class ExperimentPageComponent implements OnInit {
         this.upsertNumMap(el[1], authorKeysMap);
       // Week number - 1
       // Because the array index starts at 0 but the week number starts at 1
-        this.incrementArrayEntry(this.findIndexFromData(el[2]) - 1, tempData);
+        this.incrementArrayEntry(this.findDayOfYear(el[2]), tempData);
       });
       // Update column chart series data
       this.chart.addSeries({ name: key, data: tempData });
@@ -195,16 +195,36 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   private getEmptyArray(): number [] {
-    switch (this.xAxisOption) {
-      case XAxisOptions.MONTH:
-        return new Array(12).fill(0);
-      case XAxisOptions.WEEK:
-        return new Array(52).fill(0);
-    }
+    return new Array(365).fill(0);
+    // switch (this.xAxisOption) {
+    //   case XAxisOptions.MONTH:
+    //     return new Array(12).fill(0);
+    //   case XAxisOptions.WEEK:
+    //     return new Array(52).fill(0);
+    // }
   }
 
   private getFile(): Observable<any> {
     return this.http.get('./../../assets/commits.local.csv', { responseType: 'text' });
+  }
+
+  private findDayOfYear(currentDate: string): number {
+    // Get last day (Dec. 31) or the year of the passed in date
+    // const lastDateInYearAsNumber = new Date(new Date(currentDate).getFullYear(), 11, 31).getTime();
+    const currentDateAsNumber = Date.parse(currentDate);
+    const date = new Date(currentDate);
+    // /1000 => convert from milliseconds to seconds
+    // /60 => convert from seconds to minutes
+    // /60 => convert from minutes to hours
+    // /24 => convert from hours to days
+    // /7 => convert from days to weeks
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = (currentDateAsNumber - start.getTime()) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
+    const oneDay = 1000 * 60 * 60 * 24;
+    const day = Math.floor(diff / oneDay);
+    console.log('Day of year: ' + day);
+    // return Math.floor(52 - (lastDateInYearAsNumber - currentDateAsNumber) / 1000 / 60 / 60 / 24 / 7);
+    return day;
   }
 
   private findWeekOfYear(currentDate: string): number {
@@ -220,7 +240,7 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   private findMonthOfYear(currentDate: string): number {
-    return new Date(currentDate).getMonth() + 1;
+    return new Date(currentDate).getMonth();
   }
 
   private findIndexFromData(currentDate: string): number {
