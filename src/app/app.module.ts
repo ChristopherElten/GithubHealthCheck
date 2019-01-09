@@ -8,6 +8,9 @@ import { AppRoutingModule } from './/app-routing.module';
 import { RepoDashboardComponent } from './repo-dashboard/repo-dashboard.component';
 import { FileVolatilityComponent } from './file-volatility/file-volatility.component';
 import { ExperimentPageComponent } from './experiment-page/experiment-page.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { MatRadioModule } from '@angular/material/radio';
 
 @NgModule({
   declarations: [
@@ -20,7 +23,9 @@ import { ExperimentPageComponent } from './experiment-page/experiment-page.compo
     BrowserModule,
     HttpClientModule,
     HighchartsChartModule,
-    AppRoutingModule
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    MatRadioModule
   ],
   providers: [],
   bootstrap: [AppComponent]

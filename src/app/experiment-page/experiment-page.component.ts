@@ -222,7 +222,7 @@ export class ExperimentPageComponent implements OnInit {
     const diff = (currentDateAsNumber - start.getTime()) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
     const oneDay = 1000 * 60 * 60 * 24;
     const day = Math.floor(diff / oneDay);
-    console.log('Day of year: ' + day);
+    // console.log('Day of year: ' + day);
     // return Math.floor(52 - (lastDateInYearAsNumber - currentDateAsNumber) / 1000 / 60 / 60 / 24 / 7);
     return day;
   }
