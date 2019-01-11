@@ -31,7 +31,8 @@ export interface YearlyDataOverviewObject {
 
 export enum XAxisOptions {
   MONTH = 'month',
-  WEEK = 'week'
+  WEEK = 'week',
+  DAY = 'day'
 }
 
 @Component({
@@ -52,7 +53,7 @@ export class ExperimentPageComponent implements OnInit {
   // OTHER
   // Mass GIT meta data editor
   commitData: any;
-  xAxisOption: XAxisOptions = XAxisOptions.WEEK;
+  viewBySelectedOption: XAxisOptions = XAxisOptions.DAY;
 
   updateFromInput = false;
 
@@ -105,6 +106,14 @@ export class ExperimentPageComponent implements OnInit {
     });
   }
 
+  test(): void {
+    console.log('testing', this.viewBySelectedOption);
+    this.clearDataSeries();
+    this.yearlyDataOverviewObjects = [];
+    this.constructDataSeriesFromCommitData(this.commitData.data);
+    this.updateFromInput = true;
+  }
+
   private constructDataSeriesFromCommitData(data: string[][]): void {
     let tempData = this.getEmptyArray();
     const dataMap = new Map<number, any []>();
@@ -123,7 +132,7 @@ export class ExperimentPageComponent implements OnInit {
         this.upsertNumMap(el[1], authorKeysMap);
       // Week number - 1
       // Because the array index starts at 0 but the week number starts at 1
-        this.incrementArrayEntry(this.findDayOfYear(el[2]), tempData);
+        this.incrementArrayEntry(this.findIndexFromData(el[2]), tempData);
       });
       // Update column chart series data
       this.chart.addSeries({ name: key, data: tempData });
@@ -195,13 +204,14 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   private getEmptyArray(): number [] {
-    return new Array(365).fill(0);
-    // switch (this.xAxisOption) {
-    //   case XAxisOptions.MONTH:
-    //     return new Array(12).fill(0);
-    //   case XAxisOptions.WEEK:
-    //     return new Array(52).fill(0);
-    // }
+    switch (this.viewBySelectedOption) {
+      case XAxisOptions.MONTH:
+        return new Array(12).fill(0);
+      case XAxisOptions.WEEK:
+        return new Array(52).fill(0);
+      case XAxisOptions.DAY:
+        return new Array(365).fill(0);
+    }
   }
 
   private getFile(): Observable<any> {
@@ -244,11 +254,13 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   private findIndexFromData(currentDate: string): number {
-    switch (this.xAxisOption) {
+    switch (this.viewBySelectedOption) {
       case XAxisOptions.MONTH:
         return this.findMonthOfYear(currentDate);
       case XAxisOptions.WEEK:
         return this.findWeekOfYear(currentDate);
+      case XAxisOptions.DAY:
+        return this.findDayOfYear(currentDate);
   }
   }
 }

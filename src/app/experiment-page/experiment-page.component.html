@@ -1,6 +1,8 @@
-<mat-radio-group>
-  <mat-radio-button value="day">day</mat-radio-button>
-  <mat-radio-button value="week">week</mat-radio-button>
+
+<mat-radio-group [(ngModel)]="viewBySelectedOption" (change)="test()">
+  <mat-radio-button value="day">Day</mat-radio-button>
+  <mat-radio-button value="week">Week</mat-radio-button>
+  <mat-radio-button value="month">Month</mat-radio-button>
 </mat-radio-group>
   
 

@@ -11,6 +11,7 @@ import { ExperimentPageComponent } from './experiment-page/experiment-page.compo
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatRadioModule } from '@angular/material/radio';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { MatRadioModule } from '@angular/material/radio';
     HighchartsChartModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    FormsModule,
     MatRadioModule
   ],
   providers: [],
