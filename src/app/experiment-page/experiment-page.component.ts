@@ -53,11 +53,15 @@ export class ExperimentPageComponent implements OnInit {
   // OTHER
   // Mass GIT meta data editor
   commitData: any;
+  visibleCommitData: any;
   viewBySelectedOption: XAxisOptions = XAxisOptions.DAY;
 
-  updateFromInput = false;
+  // Filter data
+  private authorFilters: string [] = [];
+  private commitTypeFilters: string [] = [];
 
   // Highchart things
+  updateFromInput = false;
   Highcharts = Highcharts;
   chart: any;
   chartOptions = {
@@ -100,17 +104,18 @@ export class ExperimentPageComponent implements OnInit {
       map(res => parse(res))
     )
     .subscribe((commitData: CommitData) => {
-      this.commitData = commitData;
-      this.constructDataSeriesFromCommitData(commitData.data);
+      this.commitData = commitData.data;
+      this.visibleCommitData = commitData.data;
+      this.constructDataSeriesFromCommitData(this.visibleCommitData);
       this.updateFromInput = true;
     });
   }
 
-  test(): void {
+  updateViewBy(): void {
     console.log('testing', this.viewBySelectedOption);
     this.clearDataSeries();
     this.yearlyDataOverviewObjects = [];
-    this.constructDataSeriesFromCommitData(this.commitData.data);
+    this.constructDataSeriesFromCommitData(this.visibleCommitData);
     this.updateFromInput = true;
   }
 
@@ -142,13 +147,15 @@ export class ExperimentPageComponent implements OnInit {
       let count = 0;
       tempData.forEach((weeklyCommitCount: number) => count += weeklyCommitCount);
       // TODO - Make titles into card components
-      this.yearlyDataOverviewObjects.push(
-        {
-          year: key,
-          message: `${key} had ${count} commits. From commits in ${commitKeysMap}`,
-          commitKeysMap: commitKeysMap,
-          authorKeysMap: authorKeysMap
-        });
+      if (data.length > 100) {
+        this.yearlyDataOverviewObjects.push(
+          {
+            year: key,
+            message: `${key} had ${count} commits. From commits in ${commitKeysMap}`,
+            commitKeysMap: commitKeysMap,
+            authorKeysMap: authorKeysMap
+          });
+      }
 
       // Clear data
       tempData = this.getEmptyArray();
@@ -177,19 +184,25 @@ export class ExperimentPageComponent implements OnInit {
     this.chart = chart;
   }
 
-  sortGraphByCommitType(year: number, commitKey: string): void {
+  // Sorting and filtering
+  // TODO - remove possibility of duplicate search key
+  filterGraphByCommitType(year: number, commitKey: string): void {
+    this.commitTypeFilters.push(commitKey);
     this.clearDataSeries();
-    this.yearlyDataOverviewObjects = [];
-    this.commitData.data = this.commitData.data.filter(el => this.getCommitKeyFromCommitMessage(el[3]) === commitKey);
-    this.constructDataSeriesFromCommitData(this.commitData.data);
+    // TODO - Figure out yearlyDataOverviewObjects
+    // this.yearlyDataOverviewObjects = [];
+    this.visibleCommitData = this.commitData.filter(el => this.commitTypeFilters.includes(this.getCommitKeyFromCommitMessage(el[3])));
+    this.constructDataSeriesFromCommitData(this.visibleCommitData);
     this.updateFromInput = true;
   }
 
-  sortGraphByAuthor(year: number, author: string): void {
+  filterGraphByAuthor(year: number, author: string): void {
+    this.authorFilters.push(author);
     this.clearDataSeries();
-    this.yearlyDataOverviewObjects = [];
-    this.commitData.data = this.commitData.data.filter(el => el[1] === author);
-    this.constructDataSeriesFromCommitData(this.commitData.data);
+    // TODO - Figure out yearlyDataOverviewObjects
+    // this.yearlyDataOverviewObjects = [];
+    this.visibleCommitData = this.commitData.filter(el => this.authorFilters.includes(el[1]));
+    this.constructDataSeriesFromCommitData(this.visibleCommitData);
     this.updateFromInput = true;
   }
 
@@ -219,8 +232,6 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   private findDayOfYear(currentDate: string): number {
-    // Get last day (Dec. 31) or the year of the passed in date
-    // const lastDateInYearAsNumber = new Date(new Date(currentDate).getFullYear(), 11, 31).getTime();
     const currentDateAsNumber = Date.parse(currentDate);
     const date = new Date(currentDate);
     // /1000 => convert from milliseconds to seconds
@@ -261,6 +272,6 @@ export class ExperimentPageComponent implements OnInit {
         return this.findWeekOfYear(currentDate);
       case XAxisOptions.DAY:
         return this.findDayOfYear(currentDate);
-  }
+    }
   }
 }
