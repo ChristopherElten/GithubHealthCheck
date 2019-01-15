@@ -62,11 +62,12 @@ export class ExperimentPageComponent implements OnInit {
   private authorFilters: string [] = [];
   private commitTypeFilters: string [] = [];
 
-  commitKeysMap = new Map<string, number>();
   authorKeysMap = new Map<string, number>();
+  commitKeysMap = new Map<string, number>();
 
   // Search Facet
   authors = new FormControl();
+  commits = new FormControl();
 
   // Highchart things
   updateFromInput = false;
@@ -126,11 +127,6 @@ export class ExperimentPageComponent implements OnInit {
     this.updateFromInput = true;
   }
 
-  test($event: MatSelectChange) {
-    console.log('test: ', $event.value);
-    this.filterGraphByAuthors($event.value);
-  }
-
   private constructDataSeriesFromCommitData(data: string[][]): void {
     let tempData = this.getEmptyArray();
     const dataMap = new Map<number, any []>();
@@ -144,8 +140,8 @@ export class ExperimentPageComponent implements OnInit {
       const yearlyAuthorKeysMap = new Map<string, number>();
       yearData.forEach(el => {
         // Bucket commits by type (based on message)
-        this.upsertNumMap(this.getCommitKeyFromCommitMessage(el[3]), yearlyCommitKeysMap);
-        this.upsertNumMap(this.getCommitKeyFromCommitMessage(el[3]), this.commitKeysMap);
+        this.upsertNumMap(this.getCommitTypeFromCommitMessage(el[3]), yearlyCommitKeysMap);
+        this.upsertNumMap(this.getCommitTypeFromCommitMessage(el[3]), this.commitKeysMap);
         // Bucket commits by author
         this.upsertNumMap(el[1], yearlyAuthorKeysMap);
         this.upsertNumMap(el[1], this.authorKeysMap);
@@ -200,37 +196,21 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   // Sorting and filtering
-  // TODO - remove possibility of duplicate search key
-  filterGraphByCommitType(commitKey: string): void {
-    this.commitTypeFilters.push(commitKey);
+  filterGraphByCommitTypes(commitTypes: string []): void {
     this.clearDataSeries();
-    // TODO - Figure out yearlyDataOverviewObjects
-    // this.yearlyDataOverviewObjects = [];
-    this.visibleCommitData = this.commitData.filter(el => this.commitTypeFilters.includes(this.getCommitKeyFromCommitMessage(el[3])));
+    this.visibleCommitData = this.commitData.filter(el => commitTypes.includes(this.getCommitTypeFromCommitMessage(el[3])));
     this.constructDataSeriesFromCommitData(this.visibleCommitData);
     this.updateFromInput = true;
   }
 
-  // filterGraphByAuthor(author: string): void {
-  //   this.authorFilters.push(author);
-  //   this.clearDataSeries();
-  //   // TODO - Figure out yearlyDataOverviewObjects
-  //   // this.yearlyDataOverviewObjects = [];
-  //   this.visibleCommitData = this.commitData.filter(el => this.authorFilters.includes(el[1]));
-  //   this.constructDataSeriesFromCommitData(this.visibleCommitData);
-  //   this.updateFromInput = true;
-  // }
-
   filterGraphByAuthors(authors: string[]): void {
     this.clearDataSeries();
-    // TODO - Figure out yearlyDataOverviewObjects
-    // this.yearlyDataOverviewObjects = [];
     this.visibleCommitData = this.commitData.filter(el => authors.includes(el[1]));
     this.constructDataSeriesFromCommitData(this.visibleCommitData);
     this.updateFromInput = true;
   }
 
-  private getCommitKeyFromCommitMessage(commitMessage: string): string {
+  private getCommitTypeFromCommitMessage(commitMessage: string): string {
     return commitMessage.trim().split(/,|\(|:| /, 1)[0].toLowerCase();
   }
 

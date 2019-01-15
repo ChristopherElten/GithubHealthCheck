@@ -7,8 +7,14 @@
 </button>
 
 <mat-form-field>
-  <mat-select placeholder="Authors" [formControl]="authors" (selectionChange)="test($event)" multiple="true">
+  <mat-select placeholder="Authors" [formControl]="authors" (selectionChange)="filterGraphByAuthors($event.value)" multiple="true">
     <mat-option *ngFor="let authorMap of authorKeysMap | keyvalue" [value]="authorMap.key">{{ authorMap.key }}: {{ authorMap.value }}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<mat-form-field>
+  <mat-select placeholder="Commits by Type" [formControl]="commits" (selectionChange)="filterGraphByCommitTypes($event.value)" multiple="true">
+    <mat-option *ngFor="let commitKeyMap of commitKeysMap | keyvalue" [value]="commitKeyMap.key">{{ commitKeyMap.key }}: {{ commitKeyMap.value }}</mat-option>
   </mat-select>
 </mat-form-field>
 
