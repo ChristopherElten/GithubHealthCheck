@@ -32,14 +32,3 @@
   [callbackFunction]="getInstance.bind(this)"
   [(update)]="updateFromInput"
   ></highcharts-chart>
-
-<div *ngFor="let yearlyDataOverviewObject of yearlyDataOverviewObjects">
-    {{ yearlyDataOverviewObject.message }}
-  <div *ngFor="let commitMap of yearlyDataOverviewObject.commitKeysMap | keyvalue">
-    <button (click)="filterGraphByCommitType(yearlyDataOverviewObject.year, commitMap.key)">{{ commitMap.key }}: {{ commitMap.value }} Occurances</button>
-  </div>
-  <hr>
-  <div *ngFor="let authorMap of yearlyDataOverviewObject.authorKeysMap | keyvalue">
-      <button (click)="filterGraphByAuthor(yearlyDataOverviewObject.year, authorMap.key)">{{ authorMap.key }}: {{ authorMap.value }} Occurances</button>
-    </div>
-</div>

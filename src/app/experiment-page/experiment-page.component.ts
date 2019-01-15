@@ -139,14 +139,15 @@ export class ExperimentPageComponent implements OnInit {
       const yearlyCommitKeysMap = new Map<string, number>();
       const yearlyAuthorKeysMap = new Map<string, number>();
       yearData.forEach(el => {
+        // TODO - how to not increment commitKeysMap if already complete
         // Bucket commits by type (based on message)
         this.upsertNumMap(this.getCommitTypeFromCommitMessage(el[3]), yearlyCommitKeysMap);
         this.upsertNumMap(this.getCommitTypeFromCommitMessage(el[3]), this.commitKeysMap);
         // Bucket commits by author
         this.upsertNumMap(el[1], yearlyAuthorKeysMap);
         this.upsertNumMap(el[1], this.authorKeysMap);
-      // Week number - 1
-      // Because the array index starts at 0 but the week number starts at 1
+        // Week number - 1
+        // Because the array index starts at 0 but the week number starts at 1
         this.incrementArrayEntry(this.findIndexFromData(el[2]), tempData);
       });
       // Update column chart series data
@@ -156,17 +157,6 @@ export class ExperimentPageComponent implements OnInit {
       // Count commits
       let count = 0;
       tempData.forEach((weeklyCommitCount: number) => count += weeklyCommitCount);
-      // TODO - Make titles into card components
-      // TODO check if yearly data overview object should be updated
-      if (data.length > 100) {
-        this.yearlyDataOverviewObjects.push(
-          {
-            year: key,
-            message: `${key} had ${count} commits. From commits in ${yearlyCommitKeysMap}`,
-            commitKeysMap: yearlyCommitKeysMap,
-            authorKeysMap: yearlyAuthorKeysMap
-          });
-      }
 
       // Clear data
       tempData = this.getEmptyArray();
@@ -238,22 +228,15 @@ export class ExperimentPageComponent implements OnInit {
   private findDayOfYear(currentDate: string): number {
     const currentDateAsNumber = Date.parse(currentDate);
     const date = new Date(currentDate);
-    // /1000 => convert from milliseconds to seconds
-    // /60 => convert from seconds to minutes
-    // /60 => convert from minutes to hours
-    // /24 => convert from hours to days
-    // /7 => convert from days to weeks
     const start = new Date(date.getFullYear(), 0, 0);
     const diff = (currentDateAsNumber - start.getTime()) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
     const oneDay = 1000 * 60 * 60 * 24;
     const day = Math.floor(diff / oneDay);
-    // console.log('Day of year: ' + day);
     // return Math.floor(52 - (lastDateInYearAsNumber - currentDateAsNumber) / 1000 / 60 / 60 / 24 / 7);
     return day;
   }
 
   private findWeekOfYear(currentDate: string): number {
-    // Get last day (Dec. 31) or the year of the passed in date
     const lastDateInYearAsNumber = new Date(new Date(currentDate).getFullYear(), 11, 31).getTime();
     const currentDateAsNumber = Date.parse(currentDate);
     // /1000 => convert from milliseconds to seconds
