@@ -11,7 +11,9 @@ import { ExperimentPageComponent } from './experiment-page/experiment-page.compo
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatRadioModule } from '@angular/material/radio';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatOptionModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   declarations: [
@@ -27,7 +29,10 @@ import { FormsModule } from '@angular/forms';
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule,
-    MatRadioModule
+    ReactiveFormsModule,
+    MatRadioModule,
+    MatOptionModule,
+    MatSelectModule
   ],
   providers: [],
   bootstrap: [AppComponent]

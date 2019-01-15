@@ -5,6 +5,8 @@ import { Observable } from 'rxjs';
 import * as Highcharts from 'highcharts';
 import HC_more from 'highcharts/highcharts-more';
 import { map } from 'rxjs/operators';
+import { FormControl } from '@angular/forms';
+import { MatSelectChange } from '@angular/material/select';
 HC_more(Highcharts);
 
 // TODO
@@ -60,6 +62,12 @@ export class ExperimentPageComponent implements OnInit {
   private authorFilters: string [] = [];
   private commitTypeFilters: string [] = [];
 
+  commitKeysMap = new Map<string, number>();
+  authorKeysMap = new Map<string, number>();
+
+  // Search Facet
+  authors = new FormControl();
+
   // Highchart things
   updateFromInput = false;
   Highcharts = Highcharts;
@@ -112,11 +120,15 @@ export class ExperimentPageComponent implements OnInit {
   }
 
   updateViewBy(): void {
-    console.log('testing', this.viewBySelectedOption);
     this.clearDataSeries();
     this.yearlyDataOverviewObjects = [];
     this.constructDataSeriesFromCommitData(this.visibleCommitData);
     this.updateFromInput = true;
+  }
+
+  test($event: MatSelectChange) {
+    console.log('test: ', $event.value);
+    this.filterGraphByAuthors($event.value);
   }
 
   private constructDataSeriesFromCommitData(data: string[][]): void {
@@ -128,13 +140,15 @@ export class ExperimentPageComponent implements OnInit {
     data.forEach((dataPoint) => this.upsertArrMap(dataPoint, dataMap));
     // Take each year, get the week of the year and map it
     dataMap.forEach((yearData: any [], key: number) => {
-      const commitKeysMap = new Map<string, number>();
-      const authorKeysMap = new Map<string, number>();
+      const yearlyCommitKeysMap = new Map<string, number>();
+      const yearlyAuthorKeysMap = new Map<string, number>();
       yearData.forEach(el => {
         // Bucket commits by type (based on message)
-        this.upsertNumMap(this.getCommitKeyFromCommitMessage(el[3]), commitKeysMap);
+        this.upsertNumMap(this.getCommitKeyFromCommitMessage(el[3]), yearlyCommitKeysMap);
+        this.upsertNumMap(this.getCommitKeyFromCommitMessage(el[3]), this.commitKeysMap);
         // Bucket commits by author
-        this.upsertNumMap(el[1], authorKeysMap);
+        this.upsertNumMap(el[1], yearlyAuthorKeysMap);
+        this.upsertNumMap(el[1], this.authorKeysMap);
       // Week number - 1
       // Because the array index starts at 0 but the week number starts at 1
         this.incrementArrayEntry(this.findIndexFromData(el[2]), tempData);
@@ -147,13 +161,14 @@ export class ExperimentPageComponent implements OnInit {
       let count = 0;
       tempData.forEach((weeklyCommitCount: number) => count += weeklyCommitCount);
       // TODO - Make titles into card components
+      // TODO check if yearly data overview object should be updated
       if (data.length > 100) {
         this.yearlyDataOverviewObjects.push(
           {
             year: key,
-            message: `${key} had ${count} commits. From commits in ${commitKeysMap}`,
-            commitKeysMap: commitKeysMap,
-            authorKeysMap: authorKeysMap
+            message: `${key} had ${count} commits. From commits in ${yearlyCommitKeysMap}`,
+            commitKeysMap: yearlyCommitKeysMap,
+            authorKeysMap: yearlyAuthorKeysMap
           });
       }
 
@@ -186,7 +201,7 @@ export class ExperimentPageComponent implements OnInit {
 
   // Sorting and filtering
   // TODO - remove possibility of duplicate search key
-  filterGraphByCommitType(year: number, commitKey: string): void {
+  filterGraphByCommitType(commitKey: string): void {
     this.commitTypeFilters.push(commitKey);
     this.clearDataSeries();
     // TODO - Figure out yearlyDataOverviewObjects
@@ -196,12 +211,21 @@ export class ExperimentPageComponent implements OnInit {
     this.updateFromInput = true;
   }
 
-  filterGraphByAuthor(year: number, author: string): void {
-    this.authorFilters.push(author);
+  // filterGraphByAuthor(author: string): void {
+  //   this.authorFilters.push(author);
+  //   this.clearDataSeries();
+  //   // TODO - Figure out yearlyDataOverviewObjects
+  //   // this.yearlyDataOverviewObjects = [];
+  //   this.visibleCommitData = this.commitData.filter(el => this.authorFilters.includes(el[1]));
+  //   this.constructDataSeriesFromCommitData(this.visibleCommitData);
+  //   this.updateFromInput = true;
+  // }
+
+  filterGraphByAuthors(authors: string[]): void {
     this.clearDataSeries();
     // TODO - Figure out yearlyDataOverviewObjects
     // this.yearlyDataOverviewObjects = [];
-    this.visibleCommitData = this.commitData.filter(el => this.authorFilters.includes(el[1]));
+    this.visibleCommitData = this.commitData.filter(el => authors.includes(el[1]));
     this.constructDataSeriesFromCommitData(this.visibleCommitData);
     this.updateFromInput = true;
   }

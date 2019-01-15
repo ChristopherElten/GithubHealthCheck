@@ -1,3 +1,16 @@
+<button *ngFor="let authorFilter of authorFilters">
+    {{ authorFilter }}
+</button>
+
+<button *ngFor="let commitType of commitTypeFilters">
+    {{ commitType }}
+</button>
+
+<mat-form-field>
+  <mat-select placeholder="Authors" [formControl]="authors" (selectionChange)="test($event)" multiple="true">
+    <mat-option *ngFor="let authorMap of authorKeysMap | keyvalue" [value]="authorMap.key">{{ authorMap.key }}: {{ authorMap.value }}</mat-option>
+  </mat-select>
+</mat-form-field>
 
 <mat-radio-group [(ngModel)]="viewBySelectedOption" (change)="updateViewBy()">
   <mat-radio-button value="day">Day</mat-radio-button>
